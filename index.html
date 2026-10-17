@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>דרייביש – ניהול נסיעות לנהג ספיישל</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@700;900&family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#C9A227;--gold-d:#8a6d10;--gold-s:#fbf6e6;--blue:#0B2A5B;--blue-s:#eef2f9;--ink:#111;--mute:#6b7280;--line:#ece6d2;--ok:#147a43;--warn:#b45309;--bad:#b42318}
+*{box-sizing:border-box}
+html,body{margin:0;background:#fff;color:var(--ink);font-family:'Heebo',Arial,sans-serif;line-height:1.5;-webkit-tap-highlight-color:transparent}
+#app{max-width:680px;margin:0 auto;padding:0 14px 110px}
+header{position:relative;padding:14px 0 12px;border-bottom:2px solid var(--gold);margin-bottom:14px}
+.bsd{position:absolute;top:6px;right:0;font-size:14px;font-weight:500}
+.brand{margin-top:16px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.brand h1{margin:0;font-family:'Frank Ruhl Libre',serif;font-size:36px;font-weight:900;color:var(--blue)}
+.brand span{color:var(--gold-d);font-size:13px;font-weight:700}
+.today{font-size:13px;color:var(--mute);margin-top:2px}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,680px);display:flex;background:#fff;border-top:2px solid var(--gold);padding-bottom:env(safe-area-inset-bottom,0);z-index:9}
+nav button{flex:1;border:0;background:none;font:inherit;font-size:12.5px;color:var(--mute);padding:9px 2px;min-height:62px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button i{font-style:normal;font-size:22px}
+nav button.on{color:var(--blue);font-weight:800}
+nav button.on i{transform:scale(1.1)}
+h2{font-size:22px;font-weight:800;margin:6px 0 12px;color:var(--blue)}
+h3{font-size:17px;font-weight:800;margin:18px 0 8px}
+.card{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;background:#fff}
+.card.gold{background:var(--gold-s);border-color:var(--gold)}
+.card.blue{background:var(--blue-s);border-color:#c9d5ea}
+label{display:block;font-weight:700;font-size:14px;margin:10px 0 4px}
+input,select,textarea{width:100%;font:inherit;font-size:17px;padding:13px 12px;border:1.5px solid #d9d4c3;border-radius:12px;background:#fff;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px #0b2a5b22}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px;font:inherit;font-size:15px;cursor:pointer}
+.chip.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:12px;font:inherit;font-weight:800;font-size:17px;padding:15px 16px;cursor:pointer;text-decoration:none;min-height:54px}
+.btn.primary{background:var(--blue);color:#fff;width:100%;margin-top:16px;box-shadow:0 6px 18px -8px var(--blue)}
+.btn.gold{background:var(--gold);color:#1a1300}
+.btn.line{background:#fff;border:1.5px solid var(--line);color:var(--ink)}
+.btn.sm{font-size:15px;padding:10px 12px;min-height:46px}
+.acts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.acts2{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.trip-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.trip-h b{font-size:18px}
+.price{font-size:20px;font-weight:900;color:var(--gold-d);white-space:nowrap}
+.meta{color:var(--mute);font-size:14px}
+.route{margin:8px 0;font-size:16px}
+.route div{padding:2px 0}
+.badge{display:inline-block;font-size:12px;font-weight:800;padding:3px 9px;border-radius:999px}
+.b-pending{background:#fff4dc;color:var(--warn)}.b-active{background:var(--blue-s);color:var(--blue)}.b-done{background:#e5f5ec;color:var(--ok)}.b-cancel{background:#fde8e6;color:var(--bad)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-size:22px;color:var(--blue)}
+.stat span{font-size:12px;color:var(--mute)}
+.bar{display:grid;grid-template-columns:110px 1fr 36px;gap:8px;align-items:center;margin:6px 0;font-size:14px}
+.bar .t{height:14px;background:var(--gold-s);border-radius:7px;overflow:hidden}
+.bar .t i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-d))}
+.heat{display:grid;grid-template-columns:44px repeat(8,1fr);gap:3px;font-size:11px;direction:rtl}
+.heat div{text-align:center;padding:6px 0;border-radius:5px}
+.heat .hd{color:var(--mute);font-weight:700}
+.empty{text-align:center;color:var(--mute);padding:28px 10px}
+.ev{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.ev:last-child{border-bottom:0}
+.ev .d{min-width:62px;text-align:center;background:var(--blue);color:#fff;border-radius:10px;padding:6px 4px;font-size:12px;line-height:1.25}
+.ev .d b{display:block;font-size:18px}
+.lvl{font-weight:900;color:var(--gold-d)}
+.small{font-size:13px;color:var(--mute)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:7px 4px;border-bottom:1px solid var(--line);text-align:right}
+th{color:var(--mute);font-weight:700}
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;padding:12px 18px;border-radius:12px;font-weight:700;z-index:99;opacity:0;transition:.25s;pointer-events:none}
+.toast.on{opacity:1}
+.hide{display:none}
+ul.rules{padding-inline-start:18px;margin:6px 0}
+ul.rules li{margin:6px 0}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <div class="bsd">בס"ד</div>
+  <div class="brand"><h1>דרייביש</h1><span>הנהג האישי שלך · ספיישל</span></div>
+  <div class="today" id="todayLine"></div>
+</header>
+
+<!-- ORDER -->
+<section id="v-order">
+  <h2>הזמנה מהירה</h2>
+  <form id="orderForm" class="card" autocomplete="off">
+    <input type="hidden" id="f-id">
+    <div class="row">
+      <div><label>טלפון</label><input id="f-phone" type="tel" inputmode="tel" list="clientPhones" required placeholder="05X-XXXXXXX"></div>
+      <div><label>שם הלקוח</label><input id="f-name" required placeholder="ר' משה כהן"></div>
+    </div>
+    <datalist id="clientPhones"></datalist>
+    <label>אזור איסוף</label>
+    <div class="chips" id="areaChips"></div>
+    <label>שכונה</label>
+    <input id="f-hood" list="hoodList" placeholder="בחר או הקלד שכונה">
+    <datalist id="hoodList"></datalist>
+    <label>כתובת איסוף</label>
+    <input id="f-from" required placeholder="רחוב ומספר">
+    <label>יעד</label>
+    <input id="f-to" list="destList" required placeholder="לאן נוסעים?">
+    <datalist id="destList"></datalist>
+    <div class="row">
+      <div><label>תאריך</label><input id="f-date" type="date" required></div>
+      <div><label>שעה</label><input id="f-time" type="time" required></div>
+    </div>
+    <div class="row">
+      <div><label>מחיר שסוכם (₪)</label><input id="f-price" type="number" inputmode="numeric" min="0" placeholder="0"></div>
+      <div><label>נוסעים</label><input id="f-pax" type="number" inputmode="numeric" min="1" value="1"></div>
+    </div>
+    <label>הערות</label>
+    <input id="f-note" placeholder="מזוודות, כיסא תינוק, הלוך-חזור...">
+    <button class="btn primary" type="submit" id="saveBtn">✓ שמור הזמנה</button>
+    <button class="btn line hide" type="button" id="cancelEdit" style="width:100%;margin-top:8px">ביטול עריכה</button>
+  </form>
+</section>
+
+<!-- JOURNAL -->
+<section id="v-journal" class="hide">
+  <h2>יומן נסיעות</h2>
+  <div class="chips" id="statusChips" style="margin-bottom:12px"></div>
+  <div id="tripList"></div>
+</section>
+
+<!-- HEATMAP -->
+<section id="v-heat" class="hide">
+  <h2>מפת החום האישית</h2>
+  <div class="stats" id="heatStats"></div>
+  <div class="card gold" id="hotSpots"></div>
+  <div class="card"><h3 style="margin-top:0">איסופים לפי אזור</h3><div id="areaBars"></div></div>
+  <div class="card"><h3 style="margin-top:0">שכונות מובילות</h3><div id="hoodBars"></div></div>
+  <div class="card"><h3 style="margin-top:0">יום × שעה</h3><div class="heat" id="heatGrid"></div><p class="small">ככל שהמשבצת כהה יותר – יותר נסיעות בחלון הזמן הזה.</p></div>
+  <div class="card"><h3 style="margin-top:0">יעדים חוזרים</h3><div id="destBars"></div></div>
+</section>
+
+<!-- FORECAST -->
+<section id="v-fore" class="hide">
+  <h2>תחזית ביקוש</h2>
+  <div class="card blue" id="todayForecast"></div>
+  <div class="card"><h3 style="margin-top:0">30 הימים הקרובים – מועדים, הילולות וימי שיא</h3><div id="eventList"></div></div>
+  <div class="card gold">
+    <h3 style="margin-top:0">עקרונות הזהב</h3>
+    <ul class="rules">
+      <li><b>ערב שבת (שישי 10:00–שקיעה):</b> קניות אחרונות, נסיעות להורים לשבת, מקוואות.</li>
+      <li><b>מוצאי שבת:</b> חזרה מהורים, חתונות ושבע ברכות, נתב"ג. התייצב 30 דק' אחרי צאת השבת.</li>
+      <li><b>חמישי ערב:</b> קניות לשבת, שווקים (מחנה יהודה, גאולה), חתונות.</li>
+      <li><b>ראש חודש:</b> כותל, קברי צדיקים, תפילות נשים.</li>
+      <li><b>ערבי חג וחול המועד:</b> ביקושי שיא – הזמנות מראש, תמחור בהתאם.</li>
+      <li><b>הילולות:</b> נסיעות קבוצתיות לקברים (מירון, טבריה, נתיבות, קבר רחל) – הצע הלוך-חזור.</li>
+      <li><b>בין הזמנים (ט' באב–אלול, ניסן):</b> ישיבות יוצאות – הסעות בחורים ומשפחות.</li>
+      <li><b>יום רביעי בבוקר/ראשון בבוקר:</b> נתב"ג ונסיעות לבני ברק.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">ריכוזי אוכלוסייה חרדית – פוטנציאל</h3>
+    <table id="popTable"><tr><th>עיר</th><th>תושבים</th><th>שכונות מפתח</th></tr></table>
+    <p class="small">נתוני אוכלוסייה משוערים (הלמ"ס, עיגול). האפליקציה פועלת ללא אינטרנט – לוח השנה העברי מחושב במכשיר עצמו.</p>
+  </div>
+</section>
+
+<!-- CLIENTS -->
+<section id="v-clients" class="hide">
+  <h2>לקוחות</h2>
+  <input id="clientSearch" placeholder="🔍 חיפוש לפי שם או טלפון" style="margin-bottom:12px">
+  <div id="clientList"></div>
+  <div class="card">
+    <h3 style="margin-top:0">גיבוי נתונים</h3>
+    <p class="small">הכל נשמר בטלפון. מומלץ לגבות מדי פעם.</p>
+    <div class="acts" style="grid-template-columns:1fr 1fr">
+      <button class="btn line sm" id="exportBtn">⬇ ייצוא גיבוי</button>
+      <label class="btn line sm" style="margin:0">⬆ שחזור<input type="file" id="importFile" accept=".json" class="hide"></label>
+    </div>
+  </div>
+</section>
+</div>
+
+<nav id="nav">
+  <button data-v="order" class="on"><i>➕</i>הזמנה</button>
+  <button data-v="journal"><i>📒</i>יומן</button>
+  <button data-v="heat"><i>🔥</i>מפת חום</button>
+  <button data-v="fore"><i>📅</i>תחזית</button>
+  <button data-v="clients"><i>👥</i>לקוחות</button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY='drivish.v2';
+const AREAS={
+ 'ירושלים':['גאולה','מאה שערים','רמות','רמת שלמה','הר נוף','בית וגן','קרית בעלז','סנהדריה','רוממה','בר אילן','עזרת תורה','קרית מטרסדורף','נווה יעקב','רמת אשכול','מקור ברוך','בית ישראל','הר חומה','גבעת שאול'],
+ 'בית שמש':['רמה א\'','רמה ב\'','רמה ג\'','רמה ד\'','נחלה ומנוחה','קריה חרדית','שכונה ותיקה'],
+ 'בני ברק':['מרכז','פרדס כץ','קרית הרצוג','רמת אהרן','ויז\'ניץ','שיכון ה\''],
+ 'מודיעין עילית':['קרית ספר','גרין פארק','ברכפלד','נאות הפסגה'],
+ 'ביתר עילית':['גבעה א\'','גבעה ב\'','גבעה ג\''],
+ 'אלעד':['מרכז','צפון','דרום'],
+ 'נתב"ג':['טרמינל 3','טרמינל 1'],
+ 'בין-עירוני':['צפת','טבריה','מירון','נתניה','אשדוד','קרית גת','חיפה','נתיבות','בני ברק'],
+};
+const STAT={pending:'ממתין',active:'פעיל',done:'הושלם',cancel:'בוטל'};
+const DAYS=['א\'','ב\'','ג\'','ד\'','ה\'','ו\'','ש\''];
+const DAYN=['ראשון','שני','שלישי','רביעי','חמישי','שישי','מוצ"ש/שבת'];
+const POP=[['ירושלים','~1,000,000','גאולה, רמות, הר נוף, רמת שלמה'],['בני ברק','~220,000','מרכז, פרדס כץ, ויז\'ניץ'],['בית שמש','~170,000','רמה א\'–ד\''],['מודיעין עילית','~85,000','קרית ספר, ברכפלד'],['ביתר עילית','~70,000','גבעות א\'–ג\''],['אלעד','~55,000','מרכז, צפון'],['אשדוד (חרדים)','~60,000','רובע ג\'/ז\''],['צפת','~40,000','כנען, העיר העתיקה']];
+// Hebrew calendar events: [month(en Intl name), day, title, level 1-3, hint]
+const HEB=[
+ ['Tishri',1,'ראש השנה',3,'ערב החג: שיא נסיעות להורים'],['Tishri',10,'יום כיפור',3,'ערב יו"כ: מקוואות ונסיעות לבתי כנסת'],['Tishri',15,'סוכות',3,'חול המועד: כותל, טיולים משפחתיים'],['Tishri',21,'הושענא רבה',2,'כותל בלילה'],['Tishri',22,'שמחת תורה',3,'הקפות שניות'],
+ ['Heshvan',3,'הילולת הרב עובדיה יוסף',2,'סנהדריה, ירושלים'],['Heshvan',11,'יום פטירת רחל אמנו',3,'קבר רחל – עשרות אלפים, הסעות לילה'],['Heshvan',15,'הילולת החזון איש',2,'בני ברק'],
+ ['Kislev',19,'י"ט כסלו – חג הגאולה',2,'התוועדויות חב"ד'],['Kislev',25,'חנוכה',2,'הדלקות מרכזיות, ביקורי משפחה'],
+ ['Tevet',10,'עשרה בטבת',1,''],['Tevet',20,'הילולת הרמב"ם',2,'טבריה'],
+ ['Shevat',4,'הילולת הבבא סאלי',3,'נתיבות – נסיעות בין-עירוניות'],['Shevat',15,'ט"ו בשבט',1,''],
+ ['Adar',7,'ז\' באדר – הילולת משה רבינו',1,''],['Adar II',7,'ז\' באדר – הילולת משה רבינו',1,''],['Adar',14,'פורים',3,'משלוחי מנות – יום שיא כל היום'],['Adar II',14,'פורים',3,'משלוחי מנות – יום שיא כל היום'],['Adar',15,'שושן פורים (ירושלים)',3,'ירושלים חוגגת – ביקוש כפול'],['Adar II',15,'שושן פורים (ירושלים)',3,'ירושלים חוגגת – ביקוש כפול'],
+ ['Nisan',1,'ראש חודש ניסן – בין הזמנים',2,'ישיבות יוצאות'],['Nisan',14,'ערב פסח',3,'שריפת חמץ, נסיעות לסדר'],['Nisan',15,'פסח',3,'חול המועד: כותל, ברכת כהנים'],['Nisan',21,'שביעי של פסח',2,''],
+ ['Iyar',14,'הילולת רבי מאיר בעל הנס / פסח שני',2,'טבריה'],['Iyar',18,'ל"ג בעומר – הילולת רשב"י',3,'מירון! הזמנות מראש, הלוך-חזור'],['Iyar',26,'הילולת הרמח"ל',1,'עכו'],['Iyar',28,'יום פטירת שמואל הנביא',2,'קבר שמואל – הסעות מירושלים'],
+ ['Sivan',6,'שבועות',3,'ערב החג: נסיעות להורים, כותל בבוקר'],
+ ['Tamuz',15,'הילולת האור החיים',2,'הר הזיתים'],['Tamuz',17,'י"ז בתמוז',1,''],
+ ['Av',9,'תשעה באב',2,'כותל, אחריו – בין הזמנים'],['Av',10,'בין הזמנים מתחיל',2,'ישיבות יוצאות, נופש'],['Av',15,'ט"ו באב',1,'חתונות'],
+ ['Elul',1,'ראש חודש אלול – ישיבות חוזרות',2,'הסעות בחורים לישיבות'],['Elul',29,'ערב ראש השנה',3,'שיא שנתי'],
+];
+const HEBNUM=d=>{const a=['','א','ב','ג','ד','ה','ו','ז','ח','ט','י','יא','יב','יג','יד','טו','טז','יז','יח','יט','כ','כא','כב','כג','כד','כה','כו','כז','כח','כט','ל'];return a[d]||d};
+const HEBM={Tishri:'תשרי',Heshvan:'חשוון',Kislev:'כסלו',Tevet:'טבת',Shevat:'שבט','Adar I':'אדר א\'','Adar II':'אדר ב\'',Adar:'אדר',Nisan:'ניסן',Iyar:'אייר',Sivan:'סיוון',Tamuz:'תמוז',Av:'אב',Elul:'אלול'};
+
+let db=load(), area='ירושלים', filt='pending';
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{trips:[]}}catch(e){return{trips:[]}}}
+function save(){localStorage.setItem(KEY,JSON.stringify(db))}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),1800)}
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+function intlPhone(p){p=(p||'').replace(/\D/g,'');if(p.startsWith('0'))p='972'+p.slice(1);return p}
+function heb(d){const f=new Intl.DateTimeFormat('en-u-ca-hebrew',{day:'numeric',month:'long'}).formatToParts(d);return{m:f.find(x=>x.type==='month').value,d:+f.find(x=>x.type==='day').value}}
+function hebStr(d){const h=heb(d);return HEBNUM(h.d)+' '+(HEBM[h.m]||h.m)}
+
+/* NAV */
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>show(b.dataset.v));
+function show(v){document.querySelectorAll('section').forEach(s=>s.classList.add('hide'));$('#v-'+v).classList.remove('hide');
+ document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+ ({journal:renderJournal,heat:renderHeat,fore:renderFore,clients:renderClients}[v]||(()=>{}))();scrollTo(0,0)}
+
+/* ORDER FORM */
+function renderAreas(){$('#areaChips').innerHTML=Object.keys(AREAS).map(a=>`<button type="button" class="chip ${a===area?'on':''}" data-a="${a}">${a}</button>`).join('');
+ $('#hoodList').innerHTML=AREAS[area].map(h=>`<option value="${h}">`).join('');
+ document.querySelectorAll('#areaChips .chip').forEach(c=>c.onclick=()=>{area=c.dataset.a;renderAreas()})}
+function clients(){const m={};db.trips.forEach(t=>{const k=t.phone.replace(/\D/g,'');if(!m[k])m[k]={name:t.name,phone:t.phone,n:0,sum:0,last:t,addr:t.from,area:t.area,hood:t.hood};const c=m[k];c.n++;if(t.status==='done')c.sum+=+t.price||0;if((t.date+t.time)>(c.last.date+c.last.time)){c.last=t;c.name=t.name;c.addr=t.from;c.area=t.area;c.hood=t.hood}});return Object.values(m).sort((a,b)=>b.n-a.n)}
+function refreshLists(){$('#clientPhones').innerHTML=clients().map(c=>`<option value="${esc(c.phone)}">${esc(c.name)}</option>`).join('');
+ const ds=[...new Set(db.trips.map(t=>t.to))].slice(-40);$('#destList').innerHTML=[...ds,'נתב"ג טרמינל 3','הכותל המערבי','בני ברק','קבר רחל','מירון'].map(d=>`<option value="${esc(d)}">`).join('')}
+$('#f-phone').addEventListener('change',e=>{const k=e.target.value.replace(/\D/g,'');const c=clients().find(c=>c.phone.replace(/\D/g,'')===k);if(c){$('#f-name').value=c.name;$('#f-from').value=c.addr;$('#f-hood').value=c.hood||'';if(AREAS[c.area]){area=c.area;renderAreas()}toast('לקוח קיים: '+c.name)}});
+function resetForm(){$('#orderForm').reset();$('#f-id').value='';const n=new Date(Date.now()+30*60000);$('#f-date').value=iso(n);$('#f-time').value=pad(n.getHours())+':'+pad(Math.floor(n.getMinutes()/5)*5);$('#f-pax').value=1;$('#saveBtn').textContent='✓ שמור הזמנה';$('#cancelEdit').classList.add('hide')}
+$('#cancelEdit').onclick=resetForm;
+$('#orderForm').onsubmit=e=>{e.preventDefault();const id=$('#f-id').value;
+ const t={id:id||Date.now().toString(36),name:$('#f-name').value.trim(),phone:$('#f-phone').value.trim(),area,hood:$('#f-hood').value.trim(),from:$('#f-from').value.trim(),to:$('#f-to').value.trim(),date:$('#f-date').value,time:$('#f-time').value,price:$('#f-price').value,pax:$('#f-pax').value,note:$('#f-note').value.trim(),status:'pending',created:Date.now()};
+ if(id){const o=db.trips.find(x=>x.id===id);t.status=o.status;t.created=o.created;Object.assign(o,t)}else db.trips.push(t);
+ save();refreshLists();resetForm();toast(id?'ההזמנה עודכנה':'ההזמנה נשמרה ✓');filt='pending';show('journal')};
+
+/* JOURNAL */
+function renderJournal(){
+ const cnt=s=>db.trips.filter(t=>t.status===s).length;
+ $('#statusChips').innerHTML=Object.entries(STAT).map(([k,v])=>`<button class="chip ${k===filt?'on':''}" data-s="${k}">${v} (${cnt(k)})</button>`).join('');
+ document.querySelectorAll('#statusChips .chip').forEach(c=>c.onclick=()=>{filt=c.dataset.s;renderJournal()});
+ let list=db.trips.filter(t=>t.status===filt).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));if(filt==='done'||filt==='cancel')list.reverse();
+ if(!list.length){$('#tripList').innerHTML='<div class="empty">אין נסיעות ברשימה זו</div>';return}
+ const today=iso(new Date());
+ $('#tripList').innerHTML=list.map(t=>{const p=intlPhone(t.phone);const msg=encodeURIComponent(`שלום ${t.name}, כאן הנהג מדרייביש. מאשר נסיעה ב-${t.date.split('-').reverse().join('/')} בשעה ${t.time} מ${t.from} ל${t.to}${t.price?' במחיר '+t.price+' ₪':''}. נסיעה טובה!`);
+  return `<div class="card"><div class="trip-h"><div><b>${esc(t.name)}</b> <span class="badge b-${t.status}">${STAT[t.status]}</span><div class="meta">${t.date===today?'<b style="color:var(--bad)">היום</b>':t.date.split('-').reverse().join('/')} · ${t.time} · ${hebStr(new Date(t.date+'T12:00'))}</div></div><div class="price">${t.price?t.price+' ₪':''}</div></div>
+  <div class="route"><div>🟡 ${esc(t.area)}${t.hood?' · '+esc(t.hood):''} – ${esc(t.from)}</div><div>🔵 ${esc(t.to)}</div>${t.note?`<div class="meta">📝 ${esc(t.note)}</div>`:''}</div>
+  <div class="acts"><a class="btn gold sm" href="tel:${esc(t.phone)}">📞 חיוג</a><a class="btn line sm" href="sms:${esc(t.phone)}?&body=${msg}">💬 SMS</a><a class="btn line sm" href="https://wa.me/${p}?text=${msg}" target="_blank">🟢 ווטסאפ</a></div>
+  <div class="acts2">${t.status==='pending'?`<button class="btn line sm" onclick="setS('${t.id}','active')">▶ יצאתי</button>`:''}${t.status!=='done'?`<button class="btn line sm" onclick="setS('${t.id}','done')">✓ הושלם</button>`:''}<a class="btn line sm" href="https://waze.com/ul?q=${encodeURIComponent(t.from+' '+(t.area==='בין-עירוני'?'':t.area))}&navigate=yes" target="_blank">🧭 וויז</a><button class="btn line sm" onclick="ics('${t.id}')">📅 ליומן</button><button class="btn line sm" onclick="edit('${t.id}')">✏ עריכה</button>${t.status!=='cancel'?`<button class="btn line sm" onclick="setS('${t.id}','cancel')">✕ ביטול</button>`:`<button class="btn line sm" onclick="del('${t.id}')">🗑 מחיקה</button>`}</div></div>`}).join('')}
+function setS(id,s){db.trips.find(t=>t.id===id).status=s;save();renderJournal();toast(STAT[s])}
+function del(id){if(confirm('למחוק לצמיתות?')){db.trips=db.trips.filter(t=>t.id!==id);save();renderJournal()}}
+function edit(id){const t=db.trips.find(x=>x.id===id);show('order');$('#f-id').value=t.id;$('#f-name').value=t.name;$('#f-phone').value=t.phone;area=AREAS[t.area]?t.area:'ירושלים';renderAreas();$('#f-hood').value=t.hood;$('#f-from').value=t.from;$('#f-to').value=t.to;$('#f-date').value=t.date;$('#f-time').value=t.time;$('#f-price').value=t.price;$('#f-pax').value=t.pax||1;$('#f-note').value=t.note;$('#saveBtn').textContent='✓ עדכן הזמנה';$('#cancelEdit').classList.remove('hide')}
+function ics(id){const t=db.trips.find(x=>x.id===id);const s=t.date.replace(/-/g,'')+'T'+t.time.replace(':','')+'00';const e=new Date(t.date+'T'+t.time);e.setHours(e.getHours()+1);const en=iso(e).replace(/-/g,'')+'T'+pad(e.getHours())+pad(e.getMinutes())+'00';
+ const txt=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Drivish//HE','BEGIN:VEVENT','UID:'+t.id+'@drivish','DTSTART:'+s,'DTEND:'+en,'SUMMARY:נסיעה – '+t.name,'LOCATION:'+t.from,'DESCRIPTION:'+t.from+' → '+t.to+' | '+t.phone+(t.price?' | '+t.price+' ₪':''),'BEGIN:VALARM','TRIGGER:-PT30M','ACTION:DISPLAY','DESCRIPTION:נסיעה בעוד חצי שעה','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+ dl(new Blob([txt],{type:'text/calendar'}),'trip-'+t.id+'.ics')}
+function dl(b,n){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+
+/* HEATMAP */
+function bars(el,obj,max=8){const e=Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,max);const m=e[0]?.[1]||1;
+ $(el).innerHTML=e.length?e.map(([k,v])=>`<div class="bar"><span>${esc(k)}</span><div class="t"><i style="width:${v/m*100}%"></i></div><b>${v}</b></div>`).join(''):'<div class="small">אין עדיין נתונים</div>'}
+function slotOf(t){const d=new Date(t.date+'T'+t.time);let day=d.getDay(),h=d.getHours();return{day,blk:Math.floor(h/3),h}}
+function renderHeat(){const T=db.trips.filter(t=>t.status!=='cancel');const done=T.filter(t=>t.status==='done');
+ const rev=done.reduce((s,t)=>s+(+t.price||0),0);
+ $('#heatStats').innerHTML=`<div class="stat"><b>${T.length}</b><span>נסיעות</span></div><div class="stat"><b>${rev.toLocaleString()}</b><span>₪ הכנסות</span></div><div class="stat"><b>${done.length?Math.round(rev/done.length):0}</b><span>₪ ממוצע</span></div>`;
+ const ar={},hd={},ds={},combo={},grid=Array.from({length:7},()=>Array(8).fill(0));
+ T.forEach(t=>{ar[t.area]=(ar[t.area]||0)+1;if(t.hood){const k=t.hood+' ('+t.area+')';hd[k]=(hd[k]||0)+1}ds[t.to]=(ds[t.to]||0)+1;
+  const s=slotOf(t);grid[s.day][s.blk]++;
+  let when=DAYN[s.day]+(s.h>=17?' בערב':s.h>=12?' בצהריים':' בבוקר');if(s.day===6&&s.h>=17)when='מוצ"ש';else if(s.day===6)when='שבת';
+  const k=when+' · '+(t.hood||t.area);combo[k]=(combo[k]||0)+1});
+ bars('#areaBars',ar);bars('#hoodBars',hd,10);bars('#destBars',ds,6);
+ const top=Object.entries(combo).sort((a,b)=>b[1]-a[1]).slice(0,4);
+ $('#hotSpots').innerHTML='<h3 style="margin-top:0">🔥 הנקודות החמות שלך</h3>'+(top.length?top.map(([k,v],i)=>`<div style="font-size:${i?16:19}px;margin:4px 0">${i+1}. <b>${esc(k)}</b> <span class="small">(${v} נסיעות)</span></div>`).join(''):'<div class="small">הזן נסיעות – והמערכת תלמד מתי ואיפה כדאי להיות.</div>');
+ const mx=Math.max(1,...grid.flat());
+ let g='<div class="hd"></div>'+['0-3','3-6','6-9','9-12','12-15','15-18','18-21','21-24'].map(x=>`<div class="hd">${x}</div>`).join('');
+ grid.forEach((r,d)=>{g+=`<div class="hd">${DAYS[d]}</div>`+r.map(v=>{const a=v/mx;return`<div style="background:${v?`rgba(201,162,39,${.15+a*.85})`:'#f6f4ee'};color:${a>.55?'#fff':'#333'};font-weight:700">${v||''}</div>`}).join('')});
+ $('#heatGrid').innerHTML=g}
+
+/* FORECAST */
+function dayEvents(d){const h=heb(d),ev=[];HEB.forEach(e=>{if(e[0]===h.m&&e[1]===h.d)ev.push({t:e[2],l:e[3],x:e[4]})});
+ const tm=new Date(d);tm.setDate(tm.getDate()+1);const nh=heb(tm);HEB.forEach(e=>{if(e[0]===nh.m&&e[1]===nh.d&&e[3]===3&&!/ערב/.test(e[2]))ev.push({t:'ערב '+e[2],l:3,x:'יום לפני – ביקוש שיא'})});
+ if(h.d===1||h.d===30)ev.push({t:'ראש חודש '+(HEBM[h.m]||''),l:1,x:'כותל, קברי צדיקים'});
+ const w=d.getDay();if(w===5)ev.push({t:'ערב שבת',l:2,x:'קניות אחרונות, נסיעות להורים'});if(w===6)ev.push({t:'מוצאי שבת',l:2,x:'חזרות מהורים, חתונות, נתב"ג'});if(w===4)ev.push({t:'חמישי – יום קניות',l:1,x:'שווקים וקניונים בערב'});
+ return ev}
+function personalTip(d){const w=d.getDay();const T=db.trips.filter(t=>t.status!=='cancel'&&new Date(t.date+'T12:00').getDay()===w);if(T.length<2)return'';
+ const c={};T.forEach(t=>{const k=(t.hood||t.area);c[k]=(c[k]||0)+1});const b=Object.entries(c).sort((a,b)=>b[1]-a[1])[0];
+ const hs={};T.forEach(t=>{const h=+t.time.slice(0,2);hs[h]=(hs[h]||0)+1});const bh=Object.entries(hs).sort((a,b)=>b[1]-a[1])[0][0];
+ return `לפי הנתונים שלך: ביום ${DAYN[w]} הכי הרבה איסופים ב<b>${esc(b[0])}</b>, בסביבות <b>${pad(bh)}:00</b>.`}
+function renderFore(){const now=new Date();const ev=dayEvents(now);const lv=Math.max(0,...ev.map(e=>e.l));
+ const lvT=['רגיל','מוגבר','גבוה','שיא 🔥'][lv];
+ $('#todayForecast').innerHTML=`<h3 style="margin-top:0">היום · ${hebStr(now)}</h3><div>רמת ביקוש צפויה: <span class="lvl">${lvT}</span></div>${ev.map(e=>`<div style="margin-top:6px">• <b>${e.t}</b>${e.x?' – '+e.x:''}</div>`).join('')}<div style="margin-top:8px">${personalTip(now)||'<span class="small">אחרי כמה שבועות של הזנה – יופיעו כאן המלצות אישיות.</span>'}</div>`;
+ let h='';for(let i=1;i<=30;i++){const d=new Date(now);d.setDate(d.getDate()+i);const e=dayEvents(d).filter(x=>x.l>=2||x.t.startsWith('ראש חודש'));if(!e.length)continue;const L=Math.max(...e.map(x=>x.l));
+  h+=`<div class="ev"><div class="d"><b>${d.getDate()}/${d.getMonth()+1}</b>${DAYS[d.getDay()]} · ${hebStr(d)}</div><div>${e.map(x=>`<div><b>${x.t}</b>${x.x?' <span class="small">– '+x.x+'</span>':''}</div>`).join('')}<div class="small">ביקוש: <span class="lvl">${'★'.repeat(L)}</span></div></div></div>`}
+ $('#eventList').innerHTML=h||'<div class="small">אין אירועים מיוחדים</div>';
+ $('#popTable').innerHTML='<tr><th>עיר</th><th>תושבים</th><th>שכונות מפתח</th></tr>'+POP.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}
+
+/* CLIENTS */
+function renderClients(){const q=$('#clientSearch').value.trim();const L=clients().filter(c=>!q||c.name.includes(q)||c.phone.includes(q));
+ $('#clientList').innerHTML=L.length?L.map(c=>`<div class="card"><div class="trip-h"><div><b>${esc(c.name)}</b><div class="meta">${esc(c.phone)} · ${c.n} נסיעות · ${esc(c.hood||c.area)}</div></div><div class="price">${c.sum?c.sum+' ₪':''}</div></div>
+ <div class="acts"><a class="btn gold sm" href="tel:${esc(c.phone)}">📞 חיוג</a><a class="btn line sm" href="sms:${esc(c.phone)}">💬 SMS</a><button class="btn line sm" onclick="newFor('${esc(c.phone)}')">➕ הזמנה</button></div></div>`).join(''):'<div class="empty">אין לקוחות עדיין</div>'}
+$('#clientSearch').oninput=renderClients;
+function newFor(p){show('order');resetForm();$('#f-phone').value=p;$('#f-phone').dispatchEvent(new Event('change'))}
+$('#exportBtn').onclick=()=>dl(new Blob([JSON.stringify(db)],{type:'application/json'}),'drivish-backup-'+iso(new Date())+'.json');
+$('#importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(s=>{try{const d=JSON.parse(s);if(!Array.isArray(d.trips))throw 0;if(confirm('לשחזר '+d.trips.length+' נסיעות? הנתונים הנוכחיים יוחלפו.')){db=d;save();refreshLists();renderClients();toast('שוחזר ✓')}}catch(x){alert('קובץ לא תקין')}})};
+
+/* INIT */
+$('#todayLine').textContent=new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})+' · '+hebStr(new Date());
+renderAreas();refreshLists();resetForm();
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
+</script>
+</body>
+</html>
